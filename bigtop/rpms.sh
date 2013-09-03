@@ -1,8 +1,11 @@
 #!/bin/bash
 
+set -e
+
 BTBRANCH=$(source HDP_variables.sh &>/dev/null; echo $bigtopbranch)
+BTEXPORT=$(source HDP_variables.sh &>/dev/null; echo $bigtopexport)
 BRANCH=$(source HDP_variables.sh &>/dev/null; echo $huebranch)
-REPODIR="$BTBRANCH/build/hue/rpm/RPMS/x86_64"
+REPODIR="$BTEXPORT/build/hue/rpm/RPMS/x86_64"
 
 echo "Building RPMS for Hue branch '$BRANCH' with bigtop branch '$BTBRANCH'"
 echo
