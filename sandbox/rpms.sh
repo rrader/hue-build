@@ -2,15 +2,6 @@
 
 # $1 - sandbox-shared branch name
 
-# updating sources
-# if [ ! -e /home/sandbox/rpm-shared/ ]; then
-# 	cd $HOME
-# 	git clone git@github.com:/hortonworks/sandbox-shared.git rpm-shared
-# fi
-
-# cd $HOME/rpm-shared/
-# git reset --hard HEAD^^ && git fetch && git checkout "$1" && git pull
-
 # build rpms
 rm -rf $HOME/rpmbuild/out
 
