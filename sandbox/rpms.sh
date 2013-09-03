@@ -31,4 +31,4 @@ echo
 echo "=========================="
 echo "Uploading artefacts to S3"
 echo
-python build-scripts/upload.py "$BRANCH/out" "$HOME/rpmbuild" build-scripts/aws_credentials.json
+python build-scripts/upload.py "$BRANCH" "$HOME/rpmbuild/out" build-scripts/aws_credentials.json

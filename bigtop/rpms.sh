@@ -15,6 +15,9 @@ echo
 
 sudo yum -y install createrepo git rpm-build redhat-lsb libxml2-devel libxslt-devel java-1.6.0-openjdk-devel mysql-devel openldap-devel python-simplejson sqlite-devel python-setuptools python-devel
 
+sudo easy_install boto
+
+
 WORKSPACE="`pwd`"
 
 MVN_VERSION=3.1.0
