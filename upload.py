@@ -32,25 +32,29 @@ def _upload(client, path, location='repo/', remote=''):
         _upload(client, "%s/%s" % (path, f), location=location, remote="%s/%s" % (remote, f))
 
 
-def upload(name='repo', local=None):
-    "upload to s3 rpms. args: s3dir"
+def upload(prefix='repo', local=None):
+    """upload to s3 rpms.
+        args:
+        prefix - s3 prefix
+        local - local directory location
+    """
     conn = boto.connect_s3(AWS_ACCESS_KEY_ID,
                            AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(BUCKET_NAME)
 
     print "clean target location..."
-    bucket_location = name
+    bucket_location = prefix
     for key in bucket.list(bucket_location):
         print " ---  delete " + key.key
         key.delete()
 
     if not local:
-        local = name
+        local = prefix
     _upload(bucket, local, bucket_location)
 
 
 def main():
-    upload(sys.argv[1], local=sys.argv[2])
+    upload(sys.argv[1], sys.argv[2])
 
 if __name__ == '__main__':
     main()

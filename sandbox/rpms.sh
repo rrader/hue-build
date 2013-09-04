@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $1 - sandbox-shared branch name
+set -e
 
 # build rpms
 rm -rf $HOME/rpmbuild/out
@@ -23,3 +23,6 @@ echo "=========================="
 echo "Uploading artefacts to S3"
 echo
 python build-scripts/upload.py "$BRANCH" "$HOME/rpmbuild/out" build-scripts/aws_credentials.json
+
+rm -rf output
+cp -R "$HOME/rpmbuild/out" output

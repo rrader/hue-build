@@ -49,7 +49,7 @@ echo
 rm -rf "$REPODIR"
 cd "$WORKSPACE"
 
-BUILD_NUMBER=100 sh bigtop_build.sh hue
+sh bigtop_build.sh hue
 
 echo
 echo "DONE!"
@@ -67,3 +67,6 @@ echo
 
 ls -R $REPODIR
 python build-scripts/upload.py "bigtop/$1-$BRANCH" "$REPODIR" build-scripts/aws_credentials.json
+
+rm -rf output
+cp -R "$REPODIR" output
