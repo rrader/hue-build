@@ -2,6 +2,8 @@
 
 set -e
 
+source build-scripts/lib.sh
+
 BTBRANCH=$(source HDP_variables.sh &>/dev/null; echo $bigtopbranch)
 BTEXPORT=$(source HDP_variables.sh &>/dev/null; echo $bigtopexport)
 BRANCH=$(source HDP_variables.sh &>/dev/null; echo $huebranch)
@@ -66,7 +68,8 @@ echo "Uploading artefacts to S3"
 echo
 
 ls -R $REPODIR
-python build-scripts/upload.py "repo/dev/bigtop/$1-$BRANCH" "$REPODIR" build-scripts/aws_credentials.json
+
+python build-scripts/upload.py "repo/$(get_s3_directory)/$BRANCH/bigtop/$1" "$REPODIR" build-scripts/aws_credentials.json
 
 rm -rf output
 cp -R "$REPODIR" output

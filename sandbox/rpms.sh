@@ -2,6 +2,8 @@
 
 set -e
 
+source build-scripts/lib.sh
+
 # build rpms
 rm -rf $HOME/rpmbuild/out
 
@@ -22,7 +24,8 @@ echo
 echo "=========================="
 echo "Uploading artefacts to S3"
 echo
-python build-scripts/upload.py "repo/dev/utils/$BRANCH" "$HOME/rpmbuild/out" build-scripts/aws_credentials.json
+python build-scripts/upload.py "repo/$(get_s3_directory)/$BRANCH/utils/" "$HOME/rpmbuild/out" build-scripts/aws_credentials.json
+# python build-scripts/upload.py "$BRANCH" "$HOME/rpmbuild/out" build-scripts/aws_credentials.json
 
 rm -rf output
 cp -R "$HOME/rpmbuild/out" output
