@@ -16,7 +16,7 @@ echo
 # fix /dev/fd
 [ ! -e /dev/fd ] && sudo ln -s /proc/self/fd /dev/fd
 
-sudo yum -y install createrepo git rpm-build redhat-lsb libxml2-devel libxslt-devel java-1.6.0-openjdk-devel mysql-devel openldap-devel python-simplejson sqlite-devel python-setuptools python-devel
+sudo yum -y install createrepo git rpm-build redhat-lsb libxml2-devel libxslt-devel java-1.6.0-openjdk-devel mysql-devel openldap-devel python-simplejson sqlite-devel python-setuptools python-devel pam-devel
 
 sudo easy_install boto
 
@@ -66,7 +66,7 @@ echo "Uploading artefacts to S3"
 echo
 
 ls -R $REPODIR
-python build-scripts/upload.py "bigtop/$1-$BRANCH" "$REPODIR" build-scripts/aws_credentials.json
+python build-scripts/upload.py "repo/dev/bigtop/$1-$BRANCH" "$REPODIR" build-scripts/aws_credentials.json
 
 rm -rf output
 cp -R "$REPODIR" output
