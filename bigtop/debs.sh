@@ -7,7 +7,7 @@ source build-scripts/lib.sh
 BTBRANCH=$(source HDP_variables.sh &>/dev/null; echo $bigtopbranch)
 BTEXPORT=$(source HDP_variables.sh &>/dev/null; echo $bigtopexport)
 BRANCH=$(source HDP_variables.sh &>/dev/null; echo $huebranch)
-REPODIR="$BTEXPORT/build/hue/rpm/RPMS/x86_64"
+REPODIR="$BTEXPORT/output/hue"
 
 echo "Building RPMS for Hue branch '$BRANCH' with bigtop branch '$BTBRANCH'"
 echo
@@ -59,15 +59,21 @@ echo "=========================="
 echo "Creating repository..."
 echo
 
+rm -rf /tmp/repository
+mkdir -p /tmp/repository
+cd /tmp/repository
+cp "$WORKSPACE/$REPODIR"/*.deb .
+dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+cd -
 # createrepo "$REPODIR"
 
 echo "=========================="
 echo "Uploading artefacts to S3"
 echo
 
-ls -R $REPODIR
+ls -R /tmp/repository
 
-python build-scripts/upload.py "repo/$(get_s3_directory)/$BRANCH/bigtop/$1" "$REPODIR" build-scripts/aws_credentials.json
+python build-scripts/upload.py "repo/$(get_s3_directory)/$BRANCH/bigtop/$1" /tmp/repository build-scripts/aws_credentials.json
 
 rm -rf output
-cp -R "$REPODIR" output
+cp -R /tmp/repository output
