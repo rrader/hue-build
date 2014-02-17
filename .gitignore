@@ -1,1 +1,5 @@
 aws_credentials.json
+*.xml
+*.iml
+*~
+.idea
