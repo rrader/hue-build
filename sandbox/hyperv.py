@@ -3,6 +3,7 @@ import logging
 import uuid
 
 import wmi
+import time
 
 SERVER = "WIN-TEST-1"
 
@@ -15,6 +16,17 @@ INSTANCE = {
 }
 
 LOG = logging.getLogger('hyperv')
+
+HYPERV_VM_STATE_ENABLED = 2
+HYPERV_VM_STATE_DISABLED = 3
+HYPERV_VM_STATE_REBOOT = 10
+HYPERV_VM_STATE_RESET = 11
+HYPERV_VM_STATE_PAUSED = 32768
+HYPERV_VM_STATE_SUSPENDED = 32769
+
+WMI_JOB_STATUS_STARTED = 4096
+WMI_JOB_STATE_RUNNING = 4
+WMI_JOB_STATE_COMPLETED = 7
 
 
 class Instance(object):
@@ -136,6 +148,28 @@ InstanceID LIKE '%Default%' ")[0]
                                                          self.vm.path_())
         LOG.info("Created nic for %s ", self.name)
 
+    def export(self, path):
+        job, ret_code = self.hyperv.management.ExportVirtualSystem(self.vm.path_(), True, path)
+        LOG.info("Started exporting %s ", self.name)
+        if ret_code == WMI_JOB_STATUS_STARTED:
+            self._wait_for_job(job)
+        LOG.info("Finished exporting %s ", self.name)
+
+    def start(self):
+        job, ret_val = self.vm.RequestStateChange(HYPERV_VM_STATE_ENABLED)
+        if ret_val == WMI_JOB_STATUS_STARTED:
+            self._wait_for_job(job)
+        LOG.info("Booting %s ", self.name)
+
+    def _wait_for_job(self, job_path):
+        job_wmi_path = job_path.replace('\\', '/')
+        job = wmi.WMI(moniker=job_wmi_path)
+
+        while job.JobState == WMI_JOB_STATE_RUNNING:
+            time.sleep(1.)
+            job = wmi.WMI(moniker=job_wmi_path)
+        LOG.debug("Job %s FINISHED" % job_path)
+
 
 class HyperV(object):
     def __init__(self, server_name):
@@ -152,3 +186,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     hyperv = HyperV(SERVER)
     instance = hyperv.create(**INSTANCE)
+    instance.export("C:\Test")
+    instance.start()
