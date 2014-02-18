@@ -3,6 +3,7 @@ import os
 import time
 import logging
 import uuid
+from optparse import OptionParser
 
 import wmi
 
@@ -221,9 +222,20 @@ class HyperV(object):
 
 
 if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("-s", "--sleep", dest="sleep",
+	              help="sleep after boot (secs)", metavar="SLEEP")
+
+    (options, args) = parser.parse_args()
+
     logging.basicConfig(level=logging.DEBUG)
     hyperv = HyperV(SERVER)
     hyperv.destroy(**INSTANCE)
     instance = hyperv.create(**INSTANCE)
     #instance.export("C:\Test")
     instance.start()
+
+    if options.sleep:
+        LOG.info("Waiting '%s'" % options.sleep)
+        time.sleep(int(options.sleep))
+
