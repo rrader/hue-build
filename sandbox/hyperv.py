@@ -1,17 +1,20 @@
 # Used code from openstack-nova nova/virt/hyperv.py and openstack-quantum
+import os
+import time
 import logging
 import uuid
 
 import wmi
-import time
 
 SERVER = "WIN-TEST-1"
+
+vhdfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "image.vhd")
 
 INSTANCE = {
     "name": "Hortonworks Sandbox 2.0",
     "memory_mb": 2048,
     "vcpus": 2,
-    "vhdfile": "C:\sandbox.vhd",
+    "vhdfile": vhdfile,
     "int_network": "Sandbox Network",
 }
 
@@ -28,6 +31,15 @@ WMI_JOB_STATUS_STARTED = 4096
 WMI_JOB_STATE_RUNNING = 4
 WMI_JOB_STATE_COMPLETED = 7
 
+def _wait_for_job(job_path):
+    job_wmi_path = job_path.replace('\\', '/')
+    job = wmi.WMI(moniker=job_wmi_path)
+
+    while job.JobState == WMI_JOB_STATE_RUNNING:
+        time.sleep(1.)
+        job = wmi.WMI(moniker=job_wmi_path)
+    LOG.debug("Job %s FINISHED" % job_path)
+
 
 class Instance(object):
     def _find_internal_network(self, int_network):
@@ -40,16 +52,25 @@ class Instance(object):
         self.hyperv = hyperv
         self.conn = self.hyperv.conn
         self.name = name
-        self._create(name)
+        self.vhdfile = vhdfile
+        self.memory_mb = memory_mb
+        self.vcpus = vcpus
+        self.int_network = int_network
 
-        self.set_memory(memory_mb)
-        self.set_cpus(vcpus)
+    def load_existing(self):
+        self.vm = self.conn.Msvm_ComputerSystem(ElementName=self.name)[0]
 
-        if vhdfile:
-            self.add_vhd(vhdfile)
+    def create(self):
+        self._create(self.name)
 
-        if int_network:
-            self.create_nic(int_network)
+        self.set_memory(self.memory_mb)
+        self.set_cpus(self.vcpus)
+
+        if self.vhdfile:
+            self.add_vhd(self.vhdfile)
+
+        if self.int_network:
+            self.create_nic(self.int_network)
 
     def _create(self, name):
         data = self.conn.Msvm_VirtualSystemGlobalSettingData.new()
@@ -152,23 +173,27 @@ InstanceID LIKE '%Default%' ")[0]
         job, ret_code = self.hyperv.management.ExportVirtualSystem(self.vm.path_(), True, path)
         LOG.info("Started exporting %s ", self.name)
         if ret_code == WMI_JOB_STATUS_STARTED:
-            self._wait_for_job(job)
+            _wait_for_job(job)
         LOG.info("Finished exporting %s ", self.name)
 
     def start(self):
         job, ret_val = self.vm.RequestStateChange(HYPERV_VM_STATE_ENABLED)
         if ret_val == WMI_JOB_STATUS_STARTED:
-            self._wait_for_job(job)
+            _wait_for_job(job)
         LOG.info("Booting %s ", self.name)
 
-    def _wait_for_job(self, job_path):
-        job_wmi_path = job_path.replace('\\', '/')
-        job = wmi.WMI(moniker=job_wmi_path)
+    def stop(self):
+        LOG.info("Stopping %s ...", self.name)
+        job, ret_val = self.vm.RequestStateChange(HYPERV_VM_STATE_DISABLED)
+        if ret_val == WMI_JOB_STATUS_STARTED:
+            _wait_for_job(job)
+        LOG.info("Stopped %s ", self.name)
 
-        while job.JobState == WMI_JOB_STATE_RUNNING:
-            time.sleep(1.)
-            job = wmi.WMI(moniker=job_wmi_path)
-        LOG.debug("Job %s FINISHED" % job_path)
+    def destroy(self):
+        self.stop()
+        job, ret_code = self.hyperv.management.DestroyVirtualSystem(self.vm.path_())
+        if ret_code == WMI_JOB_STATUS_STARTED:
+            _wait_for_job(job)
 
 
 class HyperV(object):
@@ -179,12 +204,26 @@ class HyperV(object):
         self.switch_svc = self.conn.Msvm_VirtualSwitchManagementService()[0]
 
     def create(self, *args, **kwargs):
-        return Instance(self, *args, **kwargs)
+        vm = Instance(self, *args, **kwargs)
+        vm.create()
+        return vm
+
+    def destroy(self, *args, **kwargs):
+        name = kwargs.get("name")
+        while True:
+            try:
+                vm = Instance(self, name)
+                vm.load_existing()
+                vm.destroy()
+            except IndexError:
+                break
+        LOG.info("Old machines '%s' DESTROYED" % name)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     hyperv = HyperV(SERVER)
+    hyperv.destroy(**INSTANCE)
     instance = hyperv.create(**INSTANCE)
-    instance.export("C:\Test")
+    #instance.export("C:\Test")
     instance.start()
