@@ -240,7 +240,7 @@ def download(url, path):
         os.remove(path)
     except OSError:
         pass
-    urllib.urlretrieve(url, path)
+    urllib.urlretrieve(url, path, reporthook)
     LOG.info("retrieving '%s' DONE" % (options.file, path))
 
 
