@@ -4,6 +4,7 @@ import time
 import logging
 import uuid
 import urllib
+import time
 from optparse import OptionParser
 
 import wmi
