@@ -3,6 +3,7 @@ import os
 import time
 import logging
 import uuid
+import urllib
 from optparse import OptionParser
 
 import wmi
@@ -221,14 +222,43 @@ class HyperV(object):
         LOG.info("Old machines '%s' DESTROYED" % name)
 
 
+def download(url, path):
+    def reporthook(count, block_size, total_size):
+        global start_time
+        if count == 0:
+            start_time = time.time()
+            return
+        duration = time.time() - start_time
+        progress_size = int(count * block_size)
+        speed = int(progress_size / (1024 * duration))
+        percent = int(count * block_size * 100 / total_size)
+        status = ("%d%%, %d MB, %d KB/s, %d seconds passed" %
+                        (percent, progress_size / (1024 * 1024), speed, duration))
+        LOG.info(status)
+    LOG.info("retrieving '%s'->'%s'" % (options.file, path))
+    try:
+        os.remove(path)
+    except OSError:
+        pass
+    urllib.urlretrieve(url, path)
+    LOG.info("retrieving '%s' DONE" % (options.file, path))
+
+
 if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-s", "--sleep", dest="sleep",
 	              help="sleep after boot (secs)", metavar="SLEEP")
+    parser.add_option("-f", "--file", dest="file",
+	              help="URL to VHD", metavar="FILE")
 
     (options, args) = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
+
+    if options.file:
+        LOG.info("Downloading VHD file '%s'" % options.file)
+        download(options.file, INSTANCE['vhdfile'])
+
     hyperv = HyperV(SERVER)
     hyperv.destroy(**INSTANCE)
     instance = hyperv.create(**INSTANCE)
