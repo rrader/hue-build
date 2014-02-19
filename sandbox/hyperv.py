@@ -230,7 +230,7 @@ def download(url, path):
             start_time = time.time()
             prev_print = time.time()
             return
-        if time.time() - prev_print < 5:
+        if time.time() - prev_print < 15:
             return
         duration = time.time() - start_time
         prev_print = time.time()
