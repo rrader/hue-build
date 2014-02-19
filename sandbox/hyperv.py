@@ -246,7 +246,7 @@ def download(url, path):
     except OSError:
         pass
     urllib.urlretrieve(url, path, reporthook)
-    LOG.info("retrieving '%s' DONE" % (options.file, path))
+    LOG.info("retrieving '%s' DONE" % (options.file))
 
 
 if __name__ == "__main__":
