@@ -260,12 +260,13 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG)
 
+    hyperv = HyperV(SERVER)
+    hyperv.destroy(**INSTANCE)
+
     if options.file:
         LOG.info("Downloading VHD file '%s'" % options.file)
         download(options.file, INSTANCE['vhdfile'])
 
-    hyperv = HyperV(SERVER)
-    hyperv.destroy(**INSTANCE)
     instance = hyperv.create(**INSTANCE)
     #instance.export("C:\Test")
     instance.start()
