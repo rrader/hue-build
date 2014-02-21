@@ -207,6 +207,7 @@ class HyperV(object):
         self.switch_svc = self.conn.Msvm_VirtualSwitchManagementService()[0]
 
     def create(self, *args, **kwargs):
+        LOG.info('Creating machine with options: %s' % kwargs)
         vm = Instance(self, *args, **kwargs)
         vm.create()
         return vm
@@ -252,13 +253,18 @@ def download(url, path):
 if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-s", "--sleep", dest="sleep",
-	              help="sleep after boot (secs)", metavar="SLEEP")
+                  help="sleep after boot (secs)", metavar="SLEEP")
     parser.add_option("-f", "--file", dest="file",
-	              help="URL to VHD", metavar="FILE")
+                  help="URL to VHD", metavar="FILE")
+    parser.add_option("-m", "--mem", dest="memory",
+                  help="memory (MB)", metavar="MEMORY")
 
     (options, args) = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
+
+    if options.memory:
+        INSTANCE['memory_mb'] = int(options.memory)
 
     hyperv = HyperV(SERVER)
     hyperv.destroy(**INSTANCE)
@@ -274,4 +280,3 @@ if __name__ == "__main__":
     if options.sleep:
         LOG.info("Waiting '%s'" % options.sleep)
         time.sleep(int(options.sleep))
-
