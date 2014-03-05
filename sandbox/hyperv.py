@@ -258,8 +258,8 @@ if __name__ == "__main__":
                   help="URL to VHD", metavar="FILE")
     parser.add_option("-m", "--mem", dest="memory",
                   help="memory (MB)", metavar="MEMORY")
-    parser.add_option("-e", "--export", dest="export", action="store_true",
-                  help="export machine")
+    parser.add_option("-e", "--export", dest="export",
+                  help="export machine (true or false)")
 
     (options, args) = parser.parse_args()
 
@@ -276,7 +276,7 @@ if __name__ == "__main__":
         download(options.file, INSTANCE['vhdfile'])
 
     instance = hyperv.create(**INSTANCE)
-    if options.export:
+    if options.export and options.export != 'false':
         instance.export("C:\Sandbox-Exported")
     instance.start()
 
