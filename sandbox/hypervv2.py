@@ -11,6 +11,7 @@ import time
 from optparse import OptionParser
 import uuid
 import wmi
+import shutil
 
 SERVER = "HYPER-V"
 
@@ -320,6 +321,7 @@ if __name__ == "__main__":
         instance.load_existing()
 
     if options.export and options.export != 'false':
+        shutil.rmtree('C:\Sandbox-Exported')
         instance.export("C:\Sandbox-Exported")
     instance.start()
 
