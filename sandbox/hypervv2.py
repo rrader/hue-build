@@ -208,7 +208,7 @@ InstanceID LIKE '%%\\Default' ")[0]
         export_setting_data.CopySnapshotConfiguration = 1
         export_setting_data.SnapshotVirtualSystem = None
         export_setting_data.InstanceID = None
-        job, ret_code = self.hyperv.management.ExportSystemDefinition(self.vm.path_(), path, export_setting_data)
+        job, ret_code = self.hyperv.management.ExportSystemDefinition(self.vm.path_(), path, export_setting_data.path_())
         LOG.info("Started exporting %s ", self.name)
         if ret_code == WMI_JOB_STATUS_STARTED:
             _wait_for_job(job)
@@ -316,7 +316,7 @@ if __name__ == "__main__":
 
         instance = hyperv.create(**INSTANCE)
     else:
-        instance = Instance(**INSTANCE)
+        instance = Instance(hyperv, name=INSTANCE['name'])
         instance.load_existing()
 
     if options.export and options.export != 'false':
