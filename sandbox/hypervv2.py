@@ -68,6 +68,7 @@ class Instance(object):
         self.int_network = int_network
 
     def load_existing(self):
+        LOG.info("Loading existing configuration '%s'" % self.name)
         self.vm = self.conn.Msvm_ComputerSystem(ElementName=self.name)[0]
 
     def create(self):
@@ -293,6 +294,9 @@ if __name__ == "__main__":
                   help="memory (MB)", metavar="MEMORY")
     parser.add_option("-e", "--export", dest="export",
                   help="export machine (true or false)")
+    parser.add_option("-i", "--spinup", dest="spinup",
+                  help="spinup new machine (true or false)")
+
 
     (options, args) = parser.parse_args()
 
@@ -302,13 +306,19 @@ if __name__ == "__main__":
         INSTANCE['memory_mb'] = int(options.memory)
 
     hyperv = HyperV(SERVER)
-    hyperv.destroy(**INSTANCE)
 
-    if options.file:
-        LOG.info("Downloading VHD file '%s'" % options.file)
-        download(options.file, INSTANCE['vhdfile'])
+    if not options.spinup or options.spinup == 'true':
+        hyperv.destroy(**INSTANCE)
 
-    instance = hyperv.create(**INSTANCE)
+        if options.file:
+            LOG.info("Downloading VHD file '%s'" % options.file)
+            download(options.file, INSTANCE['vhdfile'])
+
+        instance = hyperv.create(**INSTANCE)
+    else:
+        instance = Instance(**INSTANCE)
+        instance.load_existing()
+
     if options.export and options.export != 'false':
         instance.export("C:\Sandbox-Exported")
     instance.start()
