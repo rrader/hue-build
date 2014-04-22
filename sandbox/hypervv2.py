@@ -198,7 +198,16 @@ InstanceID LIKE '%%\\Default' ")[0]
         LOG.info("Created nic for %s ", self.name)
 
     def export(self, path):
-        job, ret_code = self.hyperv.management.ExportVirtualSystem(self.vm.path_(), True, path)
+        export_setting_data_default = self.conn.Msvm_VirtualSystemExportSettingData()[0]
+        export_setting_data = self._clone_wmi_obj(
+            'Msvm_VirtualSystemExportSettingData', export_setting_data_default)
+        export_setting_data.CopyVmStorage = True
+        export_setting_data.CopyVmRuntimeInformation = True
+        export_setting_data.CreateVmExportSubdirectory = True
+        export_setting_data.CopySnapshotConfiguration = 1
+        export_setting_data.SnapshotVirtualSystem = None
+        export_setting_data.InstanceID = None
+        job, ret_code = self.hyperv.management.ExportSystemDefinition(self.vm.path_(), path, export_setting_data)
         LOG.info("Started exporting %s ", self.name)
         if ret_code == WMI_JOB_STATUS_STARTED:
             _wait_for_job(job)
