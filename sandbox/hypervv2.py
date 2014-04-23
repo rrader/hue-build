@@ -297,7 +297,8 @@ if __name__ == "__main__":
                   help="export machine (true or false)")
     parser.add_option("-i", "--spinup", dest="spinup",
                   help="spinup new machine (true or false)")
-
+    parser.add_option("-n", "--name", dest="name",
+                  help="machine name")
 
     (options, args) = parser.parse_args()
 
@@ -305,6 +306,8 @@ if __name__ == "__main__":
 
     if options.memory:
         INSTANCE['memory_mb'] = int(options.memory)
+    if options.name:
+        INSTANCE['name'] = options.name
 
     hyperv = HyperV(SERVER)
 
