@@ -25,10 +25,10 @@ sudo easy_install boto
 
 WORKSPACE="`pwd`"
 
-MVN_VERSION=3.1.1
+MVN_VERSION=3.2.1
 
 cd $HOME
-[ ! -f apache-maven-$MVN_VERSION-bin.tar.gz ] && wget http://apache-mirror.telesys.org.ua/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz
+[ ! -f apache-maven-$MVN_VERSION-bin.tar.gz ] && wget http://apache.cp.if.ua/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz
 sudo tar xzf apache-maven-$MVN_VERSION-bin.tar.gz -C /usr/local
 cd /usr/local
 sudo ln -sf apache-maven-$MVN_VERSION maven 
