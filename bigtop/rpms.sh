@@ -4,9 +4,9 @@ set -e
 
 source build-scripts/lib.sh
 
-BTBRANCH=$(source HDP_variables.sh &>/dev/null; echo $bigtopbranch)
-BTEXPORT=$(source HDP_variables.sh &>/dev/null; echo $bigtopexport)
-BRANCH=$(source HDP_variables.sh &>/dev/null; echo $huebranch)
+BTBRANCH=$(source HDP_variables.sh &>/dev/null; source HDP2_variables.sh &>/dev/null; echo $bigtopbranch)
+BTEXPORT=$(source HDP_variables.sh &>/dev/null; source HDP2_variables.sh &>/dev/null; echo $bigtopexport)
+BRANCH=$(source HDP_variables.sh &>/dev/null; source HDP2_variables.sh &>/dev/null; echo $huebranch)
 REPODIR="$BTEXPORT/build/hue/rpm/RPMS/x86_64"
 
 echo "Building RPMS for Hue branch '$BRANCH' with bigtop branch '$BTBRANCH'"
