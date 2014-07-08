@@ -51,7 +51,7 @@ echo
 rm -rf "$REPODIR"
 cd "$WORKSPACE"
 
-sh bigtop_build.sh hue
+[[ -n $OLD_BUILD ]] && sh bigtop_build.sh hue || modules=hue sh bigtop_build.sh all
 
 echo
 echo "DONE!"
